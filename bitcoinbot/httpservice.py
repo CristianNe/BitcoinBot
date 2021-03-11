@@ -2,7 +2,8 @@ import requests
 import json
 
 class HttpService:
-    __URL = "api.coingecko.com/api/v3/coins/bitcoin"
+    def __init__(self):
+        self.__URL = "api.coingecko.com/api/v3/coins/bitcoin"
 
     def getPrice(self):
         request = requests.get(self.__URL)

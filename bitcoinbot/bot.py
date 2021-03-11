@@ -16,20 +16,29 @@ class BitcoinBot(commands.Cog):
     async def bearish(self, ctx):
         price, _ = await self.http.getPrice()
         if price != -1:
-            response = self.bearishMessge(self.bitcoin.prevMilestone, price)
+            response = self.bearishMessge(mark=self.bitcoin.prevMilestone, price=price)
         else:
             response = "Failed to fetch market data. Try again."
 
         await ctx.send(content=response, file=discord.File("ressources/bear.gif"))
+
+    @commands.command(name='retesting')
+    async def retesting(self, ctx):
+        price, _ = await self.http.getPrice()
+        if price != -1:
+            response = self.retestingMessage(mark=self.bitcoin.nextMilestone, price=price)
+        else:
+            response = "Failed to fetch market data. Try again."
+        await ctx.send(content=response, file=discord.File("ressources/bitcoinbullrun.gif"))
 
     @commands.command(name='bullish')
     async def bullish(self, ctx):
         _, ath = await self.http.getPrice()
         if ath != -1:
-            response = self.bullishMessage(self.bitcoin.nextMilestone, ath)
+            response = self.bullishMessage(mark=self.bitcoin.nextMilestone, ath=ath)
         else:
             response = "Failed to fetch market data. Try again."
-        await ctx.send(content=response, file=discord.File("ressources/bear.gif"))
+        await ctx.send(content=response, file=discord.File("ressources/bitcoinbullrun.gif"))
 
     @tasks.loop(minutes=15.0)
     async def checkPrice(self):
@@ -62,4 +71,5 @@ class BitcoinBot(commands.Cog):
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 bot = commands.Bot(command_prefix='$')
+bot.add_cog(BitcoinBot(bot))
 bot.run(TOKEN)
