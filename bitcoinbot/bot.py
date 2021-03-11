@@ -14,15 +14,22 @@ class BitcoinBot(commands.Cog):
 
     @commands.command(name='bearish')
     async def bearish(self, ctx):
-        price, _ = self.http.getPrice()
-        response = 'FUCK Bitcoin fell back under <price> :bearmarket:'
+        price, _ = await self.http.getPrice()
+        if price != -1:
+            response = self.bearishMessge(self.bitcoin.prevMilestone, price)
+        else:
+            response = "Failed to fetch market data. Try again."
 
-        await ctx.send(content=response, file="ressources/bear.gif")
+        await ctx.send(content=response, file=discord.File("ressources/bear.gif"))
 
     @commands.command(name='bullish')
     async def bullish(self, ctx):
-        price, ath = self.http.getPrice()
-        await ctx.send(content=self.bullishMessage(self.bitcoin.nextMilestone, ath), file="ressources/bear.gif")
+        _, ath = await self.http.getPrice()
+        if ath != -1:
+            response = self.bullishMessage(self.bitcoin.nextMilestone, ath)
+        else:
+            response = "Failed to fetch market data. Try again."
+        await ctx.send(content=response, file=discord.File("ressources/bear.gif"))
 
     @tasks.loop(minutes=15.0)
     async def checkPrice(self):
@@ -45,11 +52,11 @@ class BitcoinBot(commands.Cog):
     def bullishMessage(self, mark, ath):
         return f'Bitcoin passed the ${mark} mark for the first time ever, reaching a new all-time high of ${ath}!'
 
-    def retestingMessage(self, mark):
-        return f'Bitcoin successfully retested the ${mark} mark!'
+    def retestingMessage(self, mark, price):
+        return f'Bitcoin successfully retested the ${mark} mark! Currently worth ${price}.'
 
-    def bearishMessge(self, mark):
-        return f'Bitcoin fell back under the previous ${mark} mark. HODL brothers, Diamonds hands only!'
+    def bearishMessge(self, mark, price):
+        return f'Bitcoin fell back under the previous ${mark} mark and is currently worth ${price}. HODL brothers, Diamond hands only!'
 
 
 load_dotenv()
