@@ -40,13 +40,6 @@ class BitcoinBot(commands.Cog):
                                f"with id: ``{self.channels[guild.id]}``")
         self.saveChannels()
 
-    #@commands.Cog.listener()
-    #async def on_ready(self):
-        #get general channel
-        #for channel in self.bot.get_all_channels():
-            #if type(channel) is discord.channel.TextChannel and channel.name == 'general':
-               # self.channels[channel.guild.id] = channel.id
-
     @commands.command(name='initChannel')
     async def initChannel(self, ctx):
         self.channels[ctx.guild.id] = ctx.channel.id
@@ -86,14 +79,14 @@ class BitcoinBot(commands.Cog):
         price, ath = self.http.getPrice()
         if price != -1 and ath != -1:
             if price > self.bitcoin.nextMilestone and ath > self.bitcoin.ath:
-                #send newATH message(mark=nextMilestone, newATH=price)
+                await self.sendBullishMessage(mark=self.bitcoin.nextMilestone, ath=ath)
                 self.bitcoin.updateMilestones(bullish=True)
                 self.bitcoin.updateATH(ath)
             elif price > self.bitcoin.nextMilestone:
-                #send retesting message (retest=nextMilestone)
-                self.bitcoin.updateMilestones()
+                await self.sendRetestingMessage(mark=self.bitcoin.nextMilestone, price=price)
+                self.bitcoin.updateMilestones(bullish=True)
             elif price < self.bitcoin.prevMilestone:
-                #send bullish message ()
+                await self.sendBearishMessage(mark=self.bitcoin.prevMilestone, price=price)
                 self.bitcoin.updateMilestones(bullish=False)
 
     @checkPrice.before_loop
@@ -102,6 +95,33 @@ class BitcoinBot(commands.Cog):
 
     async def sendInitMessage(self, ctx):
         await ctx.send(content=f"Successfully initialized ``{ctx.channel.name}`` with id: ``{self.channels[ctx.guild.id]}``")
+
+    async def sendBullishMessage(self, mark, ath):
+        for guild in self.bot.guilds:
+            channel = guild.get_channel(self.channels[guild.id])
+            if channel is not None:
+                await channel.send(content=self.bullishMessage(mark=mark, ath=ath))
+            else:
+                #ToDo:log no channel found
+                pass
+
+    async def sendRetestingMessage(self, mark, price):
+        for guild in self.bot.guilds:
+            channel = guild.get_channel(self.channels[guild.id])
+            if channel is not None:
+                await channel.send(content=self.retestingMessage(mark=mark, price=price))
+            else:
+                #ToDo:log no channel found
+                pass
+
+    async def sendBearishMessage(self, mark, price):
+        for guild in self.bot.guilds:
+            channel = guild.get_channel(self.channels[guild.id])
+            if channel is not None:
+                await channel.send(content=self.bearishMessage(mark=mark, price=price))
+            else:
+                #ToDo:log no channel found
+                pass
 
     def bullishMessage(self, mark, ath):
         return f':rocket: Bitcoin passed the ${mark} mark for the first time ever, reaching a new all-time high of ${ath}! :rocket:'
