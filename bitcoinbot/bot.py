@@ -8,8 +8,9 @@ from bitcoinbot.httpservice import HttpService
 
 class BitcoinBot(commands.Cog):
     def __init__(self, bot):
-        self.bitcoin = Bitcoin()
         self.http = HttpService()
+        _, ath = self.http.getMarketStats()
+        self.bitcoin = Bitcoin(ath)
         self.bot = bot
         self.channels = {}
         self.loadChannels()
@@ -48,7 +49,7 @@ class BitcoinBot(commands.Cog):
 
     @commands.command(name='bearish')
     async def bearish(self, ctx):
-        price, _ = self.http.getPrice()
+        price, _ = self.http.getMarketStats()
         if price != -1:
             response = self.bearishMessge(mark=self.bitcoin.prevMilestone, price=price)
         else:
@@ -58,7 +59,7 @@ class BitcoinBot(commands.Cog):
 
     @commands.command(name='retesting')
     async def retesting(self, ctx):
-        price, _ = self.http.getPrice()
+        price, _ = self.http.getMarketStats()
         if price != -1:
             response = self.retestingMessage(mark=self.bitcoin.nextMilestone, price=price)
         else:
@@ -67,16 +68,16 @@ class BitcoinBot(commands.Cog):
 
     @commands.command(name='bullish')
     async def bullish(self, ctx):
-        _, ath = self.http.getPrice()
+        _, ath = self.http.getMarketStats()
         if ath != -1:
             response = self.bullishMessage(mark=self.bitcoin.nextMilestone, ath=ath)
         else:
             response = "Failed to fetch market data. Try again."
         await ctx.send(content=response, file=discord.File("ressources/bitcoinbullrun.gif"))
 
-    @tasks.loop(minutes=15.0)
+    @tasks.loop(minutes=5.0)
     async def checkPrice(self):
-        price, ath = self.http.getPrice()
+        price, ath = self.http.getMarketStats()
         if price != -1 and ath != -1:
             if price > self.bitcoin.nextMilestone and ath > self.bitcoin.ath:
                 await self.sendBullishMessage(mark=self.bitcoin.nextMilestone, ath=ath)
@@ -98,27 +99,29 @@ class BitcoinBot(commands.Cog):
 
     async def sendBullishMessage(self, mark, ath):
         for guild in self.bot.guilds:
-            channel = guild.get_channel(self.channels[guild.id])
+            print(f"guild: {guild}\nchannel.Id: {self.channels[str(guild.id)]}")
+            channel = guild.get_channel(self.channels[str(guild.id)])
             if channel is not None:
-                await channel.send(content=self.bullishMessage(mark=mark, ath=ath))
+                await channel.send(content=self.bullishMessage(mark=mark, ath=ath), file=discord.File("ressources/bitcoinbullrun.gif"))
+                pass
             else:
                 #ToDo:log no channel found
                 pass
 
     async def sendRetestingMessage(self, mark, price):
         for guild in self.bot.guilds:
-            channel = guild.get_channel(self.channels[guild.id])
+            channel = guild.get_channel(self.channels[str(guild.id)])
             if channel is not None:
-                await channel.send(content=self.retestingMessage(mark=mark, price=price))
+                await channel.send(content=self.retestingMessage(mark=mark, price=price),file=discord.File("ressources/btcRetesting.jpg"),)
             else:
                 #ToDo:log no channel found
                 pass
 
     async def sendBearishMessage(self, mark, price):
         for guild in self.bot.guilds:
-            channel = guild.get_channel(self.channels[guild.id])
+            channel = guild.get_channel(self.channels[str(guild.id)])
             if channel is not None:
-                await channel.send(content=self.bearishMessage(mark=mark, price=price))
+                await channel.send(content=self.bearishMessage(mark=mark, price=price), file=discord.File("ressources/bear.gif"))
             else:
                 #ToDo:log no channel found
                 pass

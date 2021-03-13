@@ -1,10 +1,13 @@
+from math import ceil
 class Bitcoin:
-    #list of milestones btc hit so far in $
-    history = [x * 10**4 for x in range(1, 6)]
-    ath = 0
-    def __init__(self):
+
+    def __init__(self, ath):
+        self.__initHistory(ath)
         self.__initMilestones()
-        self.updateATH()
+        self.updateATH(ath)
+
+    def __initHistory(self, ath):
+        self.history = [x*10**4 for x in range(1, ceil(ath/(10**4)))]
 
     def __initMilestones(self):
         self.prevMilestone = self.history[self.history.__len__()-1]
