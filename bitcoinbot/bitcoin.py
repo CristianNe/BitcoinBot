@@ -8,7 +8,6 @@ class Bitcoin:
 
     def __initHistory(self, ath):
         self.history = [x*10**4 for x in range(1, ceil(ath/(10**4)))]
-        print(f'history: {self.history}')
 
     def __initMilestones(self, price=None):
         if price is None:
@@ -19,7 +18,6 @@ class Bitcoin:
                     self.prevMilestone = self.history[self.history.index(milestone) - 1]
                     break
         self.nextMilestone = self.prevMilestone + 10 ** 4
-        print(f'prevMilestone: {self.prevMilestone} nextMilestone:{self.nextMilestone}')
 
     def __setMilestones(self, increment=True):
         if increment is True:

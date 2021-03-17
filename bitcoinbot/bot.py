@@ -12,7 +12,6 @@ class BitcoinBot(commands.Cog):
         ath = -1
         while ath == -1:
             price, ath = self.http.getMarketStats()
-        print('price:', price)
         self.bitcoin = Bitcoin(ath=ath, price=price)
         self.bot = bot
         self.channels = {}
