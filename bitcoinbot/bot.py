@@ -83,9 +83,9 @@ class BitcoinBot(commands.Cog):
         if price != -1 and ath != -1:
             if price > self.bitcoin.nextMilestone and ath > self.bitcoin.ath:
                 if self.bitcoin.nextMilestone in self.bitcoin.history:
-                    await self.sendBullishMessage(mark=self.bitcoin.nextMilestone, ath=ath, newMilestone=false)
+                    await self.sendBullishMessage(mark=self.bitcoin.nextMilestone, ath=ath, newMilestone=False)
                 else:
-                    await self.sendBullishMessage(mark=self.bitcoin.nextMilestone, ath=ath, newMilestone=true)
+                    await self.sendBullishMessage(mark=self.bitcoin.nextMilestone, ath=ath, newMilestone=True)
                 self.bitcoin.updateMilestones(bullish=True)
                 self.bitcoin.updateATH(ath)
             elif price > self.bitcoin.nextMilestone:
