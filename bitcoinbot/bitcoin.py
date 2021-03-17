@@ -1,18 +1,25 @@
 from math import ceil
 class Bitcoin:
 
-    def __init__(self, ath):
+    def __init__(self, ath, price=None):
         self.__initHistory(ath)
-        self.__initMilestones()
+        self.__initMilestones(price)
         self.updateATH(ath)
 
     def __initHistory(self, ath):
         self.history = [x*10**4 for x in range(1, ceil(ath/(10**4)))]
+        print(f'history: {self.history}')
 
-    def __initMilestones(self):
-        self.prevMilestone = self.history[self.history.__len__()-1]
+    def __initMilestones(self, price=None):
+        if price is None:
+            self.prevMilestone = self.history[self.history.__len__()-1]
+        else:
+            for milestone in self.history:
+                if milestone > price:
+                    self.prevMilestone = self.history[self.history.index(milestone) - 1]
+                    break
         self.nextMilestone = self.prevMilestone + 10 ** 4
-
+        print(f'prevMilestone: {self.prevMilestone} nextMilestone:{self.nextMilestone}')
 
     def __setMilestones(self, increment=True):
         if increment is True:

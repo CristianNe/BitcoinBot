@@ -14,7 +14,7 @@ class HttpService:
           print(f"checked price:\nprice: ${price}\nath: ${ath}")
           return price, ath
 
-        elif request.status_code >= 400:
+        else:
             with open('ressources/error.log', 'w') as f:
                 f.write(request.text)
             return -1, -1

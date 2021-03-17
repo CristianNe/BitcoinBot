@@ -9,8 +9,11 @@ from bitcoinbot.httpservice import HttpService
 class BitcoinBot(commands.Cog):
     def __init__(self, bot):
         self.http = HttpService()
-        _, ath = self.http.getMarketStats()
-        self.bitcoin = Bitcoin(ath)
+        ath = -1
+        while ath == -1:
+            price, ath = self.http.getMarketStats()
+        print('price:', price)
+        self.bitcoin = Bitcoin(ath=ath, price=price)
         self.bot = bot
         self.channels = {}
         self.loadChannels()
