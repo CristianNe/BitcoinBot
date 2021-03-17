@@ -82,7 +82,10 @@ class BitcoinBot(commands.Cog):
         price, ath = self.http.getMarketStats()
         if price != -1 and ath != -1:
             if price > self.bitcoin.nextMilestone and ath > self.bitcoin.ath:
-                await self.sendBullishMessage(mark=self.bitcoin.nextMilestone, ath=ath)
+                if self.bitcoin.nextMilestone in self.bitcoin.history:
+                    await self.sendBullishMessage(mark=self.bitcoin.nextMilestone, ath=ath, newMilestone=false)
+                else:
+                    await self.sendBullishMessage(mark=self.bitcoin.nextMilestone, ath=ath, newMilestone=true)
                 self.bitcoin.updateMilestones(bullish=True)
                 self.bitcoin.updateATH(ath)
             elif price > self.bitcoin.nextMilestone:
@@ -99,12 +102,13 @@ class BitcoinBot(commands.Cog):
     async def sendInitMessage(self, ctx):
         await ctx.send(content=f"Successfully initialized ``{ctx.channel.name}`` with id: ``{self.channels[ctx.guild.id]}``")
 
-    async def sendBullishMessage(self, mark, ath):
+    async def sendBullishMessage(self, mark, ath, newMilestone):
         for guild in self.bot.guilds:
             print(f"guild: {guild}\nchannel.Id: {self.channels[str(guild.id)]}")
             channel = guild.get_channel(self.channels[str(guild.id)])
             if channel is not None:
-                await channel.send(content=self.bullishMessage(mark=mark, ath=ath), file=discord.File("ressources/bitcoinbullrun.gif"))
+                await channel.send(content=self.bullishMessage(mark=mark, ath=ath, newMilestone= newMilestone),
+                                   file=discord.File("ressources/bitcoinbullrun.gif"))
                 pass
             else:
                 #ToDo:log no channel found
@@ -128,8 +132,12 @@ class BitcoinBot(commands.Cog):
                 #ToDo:log no channel found
                 pass
 
-    def bullishMessage(self, mark, ath):
-        return f':rocket: Bitcoin passed the ${mark} mark for the first time ever, reaching a new all-time high of ${ath}! :rocket:'
+    def bullishMessage(self, mark, ath, newMilestone):
+        if newMilestone:
+            return f':rocket: Bitcoin passed the ${mark} mark for the first time ever, reaching a new all-time high of ${ath}! :rocket:'
+        else:
+            return f':rocket: Bitcoin reached a new all-time high of ${ath}! :rocket:'
+
 
     def retestingMessage(self, mark, price):
         return f'Bitcoin successfully retested the ${mark} mark! Currently worth ${price}.'
